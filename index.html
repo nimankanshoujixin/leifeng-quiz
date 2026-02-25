@@ -1,411 +1,571 @@
 <!doctype html>
 <html lang="zh-CN">
+
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
-  <title>雷锋知识竞答</title>
-  <style>
-    :root{
-      --card: rgba(255,255,255,.92);
-      --shadow: 0 12px 40px rgba(0,0,0,.25);
-      --brand: #d0021b;
-      --gold: #d4af37;
-      --text: #1a1a1a;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",Arial,sans-serif;
-      color:var(--text);
-      min-height:100vh;
-      background: url("bg.jpg") center/cover no-repeat fixed;
-    }
-    .overlay{
-      min-height:100vh;
-      background: linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.55));
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:18px;
-    }
-    .app{
-      width:min(980px, 100%);
-      background: var(--card);
-      border-radius:18px;
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-    .topbar{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      padding:14px 16px;
-      background: rgba(255,255,255,.95);
-      border-bottom:1px solid rgba(0,0,0,.06);
-    }
-    .logo{
-      width:42px;height:42px;border-radius:10px;
-      background:#fff;
-      border:1px solid rgba(0,0,0,.08);
-      display:flex;align-items:center;justify-content:center;
-      overflow:hidden;
-      flex:0 0 auto;
-    }
-    .logo img{width:100%;height:100%;object-fit:contain}
-    .titlewrap{flex:1}
-    .title{
-      font-size:18px;
-      font-weight:800;
-      line-height:1.2;
-    }
-    .subtitle{
-      font-size:12px;
-      opacity:.75;
-      margin-top:2px;
-    }
-    .controls{
-      display:flex;gap:8px;align-items:center;flex:0 0 auto;
-    }
-    .btn{
-      border:0;
-      background: var(--brand);
-      color:#fff;
-      padding:10px 12px;
-      border-radius:10px;
-      cursor:pointer;
-      font-weight:700;
-      font-size:13px;
-    }
-    .btn.secondary{
-      background: rgba(0,0,0,.08);
-      color:#111;
-    }
-    .btn.ghost{
-      background: transparent;
-      border:1px solid rgba(0,0,0,.18);
-      color:#111;
-    }
-    .btn:disabled{opacity:.5;cursor:not-allowed}
-    .content{padding:16px}
-    .row{display:flex;gap:14px;flex-wrap:wrap}
-    .card{
-      background:#fff;
-      border:1px solid rgba(0,0,0,.08);
-      border-radius:16px;
-      padding:14px;
-      flex:1 1 300px;
-    }
-    .badgebar{
-      display:flex;gap:10px;flex-wrap:wrap;align-items:center;
-    }
-    .badge{
-      display:flex;align-items:center;gap:8px;
-      padding:8px 10px;border-radius:999px;
-      border:1px solid rgba(0,0,0,.10);
-      background: rgba(255,255,255,.8);
-      font-size:13px;font-weight:700;
-    }
-    .dot{
-      width:10px;height:10px;border-radius:50%;
-      background: rgba(0,0,0,.15);
-    }
-    .badge.on .dot{background: var(--gold)}
-    .badge.on{border-color: rgba(212,175,55,.7)}
-    .progress{
-      height:10px;border-radius:999px;
-      background: rgba(0,0,0,.08);
-      overflow:hidden;
-      margin-top:10px;
-    }
-    .progress > div{
-      height:100%;
-      width:0%;
-      background: linear-gradient(90deg, var(--brand), #ff6a00);
-      transition: width .25s ease;
-    }
-    .qtitle{
-      font-size:16px;font-weight:800;line-height:1.35;
-      margin:0 0 10px 0;
-    }
-    .meta{
-      font-size:12px;opacity:.7;margin-bottom:10px;
-      display:flex;gap:10px;flex-wrap:wrap;
-    }
-    .options{display:grid;gap:10px}
-    .opt{
-      border:1px solid rgba(0,0,0,.12);
-      border-radius:12px;
-      padding:10px 12px;
-      background:#fff;
-      cursor:pointer;
-      display:flex;gap:10px;align-items:flex-start;
-    }
-    .opt:hover{background: rgba(0,0,0,.03)}
-    .opt .k{
-      font-weight:900;
-      width:26px;height:26px;border-radius:8px;
-      display:flex;align-items:center;justify-content:center;
-      background: rgba(0,0,0,.06);
-      flex:0 0 auto;
-    }
-    .opt.correct{border-color: rgba(46,204,113,.55); background: rgba(46,204,113,.10)}
-    .opt.wrong{border-color: rgba(231,76,60,.55); background: rgba(231,76,60,.10)}
-    .footer{
-      display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;
-      margin-top:12px;
-    }
-    .hint{
-      font-size:12px;opacity:.75;
-    }
-    .big{
-      font-size:22px;font-weight:900;margin:4px 0 0;
-    }
-    .pill{
-      display:inline-block;
-      padding:6px 10px;border-radius:999px;
-      background: rgba(208,2,27,.10);
-      border:1px solid rgba(208,2,27,.25);
-      font-weight:800;
-      margin-right:8px;
-    }
-    .field{
-      display:flex;flex-direction:column;gap:6px;margin-top:10px;
-    }
-    input{
-      padding:10px 12px;border-radius:12px;border:1px solid rgba(0,0,0,.18);
-      font-size:14px;
-    }
-    .smallnote{font-size:12px;opacity:.75;margin-top:8px}
-    @media (max-width:520px){
-      .title{font-size:16px}
-      .btn{padding:10px 10px}
-    }
-  </style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+    <title>雷锋知识竞答</title>
+    <style>
+        :root {
+            --card: rgba(255, 255, 255, .92);
+            --shadow: 0 12px 40px rgba(0, 0, 0, .25);
+            --brand: #d0021b;
+            --gold: #d4af37;
+            --text: #1a1a1a;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+            color: var(--text);
+            min-height: 100vh;
+            background: url("bg.jpg") center/cover no-repeat fixed;
+        }
+
+        .overlay {
+            min-height: 100vh;
+            background: linear-gradient(180deg, rgba(0, 0, 0, .35), rgba(0, 0, 0, .55));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+        }
+
+        .app {
+            width: min(980px, 100%);
+            background: var(--card);
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, .95);
+            border-bottom: 1px solid rgba(0, 0, 0, .06);
+        }
+
+        .logo {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, .08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex: 0 0 auto;
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain
+        }
+
+        .titlewrap {
+            flex: 1
+        }
+
+        .title {
+            font-size: 18px;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            opacity: .75;
+            margin-top: 2px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex: 0 0 auto;
+        }
+
+        .btn {
+            border: 0;
+            background: var(--brand);
+            color: #fff;
+            padding: 10px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .btn.secondary {
+            background: rgba(0, 0, 0, .08);
+            color: #111;
+        }
+
+        .btn.ghost {
+            background: transparent;
+            border: 1px solid rgba(0, 0, 0, .18);
+            color: #111;
+        }
+
+        .btn:disabled {
+            opacity: .5;
+            cursor: not-allowed
+        }
+
+        .content {
+            padding: 16px
+        }
+
+        .row {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, .08);
+            border-radius: 16px;
+            padding: 14px;
+            flex: 1 1 300px;
+        }
+
+        .badgebar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(0, 0, 0, .10);
+            background: rgba(255, 255, 255, .8);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, .15);
+        }
+
+        .badge.on .dot {
+            background: var(--gold)
+        }
+
+        .badge.on {
+            border-color: rgba(212, 175, 55, .7)
+        }
+
+        .progress {
+            height: 10px;
+            border-radius: 999px;
+            background: rgba(0, 0, 0, .08);
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress>div {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--brand), #ff6a00);
+            transition: width .25s ease;
+        }
+
+        .qtitle {
+            font-size: 16px;
+            font-weight: 800;
+            line-height: 1.35;
+            margin: 0 0 10px 0;
+        }
+
+        .meta {
+            font-size: 12px;
+            opacity: .7;
+            margin-bottom: 10px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .options {
+            display: grid;
+            gap: 10px
+        }
+
+        .opt {
+            border: 1px solid rgba(0, 0, 0, .12);
+            border-radius: 12px;
+            padding: 10px 12px;
+            background: #fff;
+            cursor: pointer;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .opt:hover {
+            background: rgba(0, 0, 0, .03)
+        }
+
+        .opt .k {
+            font-weight: 900;
+            width: 26px;
+            height: 26px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, .06);
+            flex: 0 0 auto;
+        }
+
+        .opt.correct {
+            border-color: rgba(46, 204, 113, .55);
+            background: rgba(46, 204, 113, .10)
+        }
+
+        .opt.wrong {
+            border-color: rgba(231, 76, 60, .55);
+            background: rgba(231, 76, 60, .10)
+        }
+
+        .footer {
+            display: flex;
+            gap: 10px;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .hint {
+            font-size: 12px;
+            opacity: .75;
+        }
+
+        .big {
+            font-size: 22px;
+            font-weight: 900;
+            margin: 4px 0 0;
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(208, 2, 27, .10);
+            border: 1px solid rgba(208, 2, 27, .25);
+            font-weight: 800;
+            margin-right: 8px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        input {
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, .18);
+            font-size: 14px;
+        }
+
+        .smallnote {
+            font-size: 12px;
+            opacity: .75;
+            margin-top: 8px
+        }
+
+        @media (max-width:520px) {
+            .title {
+                font-size: 16px
+            }
+
+            .btn {
+                padding: 10px 10px
+            }
+        }
+    </style>
 </head>
 
 <body>
-<div class="overlay">
-  <div class="app" id="app">
-    <div class="topbar">
-      <div class="logo"><img src="logo.png" alt="logo" onerror="this.style.display='none'"></div>
-      <div class="titlewrap">
-        <div class="title">雷锋知识竞答</div>
-        <div class="subtitle" id="sub">三关闯关，集齐勋章，完成通关抽奖</div>
-      </div>
-      <div class="controls">
-        <button class="btn ghost" id="musicBtn">♫ 音乐：关</button>
-        <button class="btn secondary" id="resetBtn">重置</button>
-      </div>
+    <div class="overlay">
+        <div class="app" id="app">
+            <div class="topbar">
+                <div class="logo"><img src="logo.png" alt="logo" onerror="this.style.display='none'"></div>
+                <div class="titlewrap">
+                    <div class="title">雷锋知识竞答</div>
+                    <div class="subtitle" id="sub">三关闯关，集齐勋章，完成通关抽奖</div>
+                </div>
+                <div class="controls">
+                    <button class="btn ghost" id="musicBtn">♫ 音乐：关</button>
+                    <button class="btn secondary" id="resetBtn">重置</button>
+                </div>
+            </div>
+
+            <div class="content" id="view"></div>
+        </div>
     </div>
 
-    <div class="content" id="view"></div>
-  </div>
-</div>
+    <audio id="bgm" src="bgm.mp3" loop preload="auto"></audio>
 
-<audio id="bgm" src="bgm.mp3" loop preload="auto"></audio>
+    <script>
+        /* -------------------------
+           配置区：你可以自由改这些
+        ------------------------- */
+        const PASS = {
+            stage1_min_correct: 14, // 第一关 20 题，答对 >= 14 通过
+            stage2_min_correct: 14, // 第二关 20 题
+            stage3_min_correct: 13  // 第三关 19 题，建议按比例约 70%
+        };
 
-<script>
-/* -------------------------
-   配置区：你可以自由改这些
-------------------------- */
-const PASS = {
-  stage1_min_correct: 14, // 第一关 20 题，答对 >= 14 通过
-  stage2_min_correct: 14, // 第二关 20 题
-  stage3_min_correct: 13  // 第三关 19 题，建议按比例约 70%
-};
+        // 线上保存配置（可选）
+        // 方式1：使用 GitHub Gist API（需要创建 GitHub Personal Access Token）
+        // 
+        // 配置步骤：
+        // 1. 访问 https://github.com/settings/tokens 创建 Personal Access Token（需要 gist 权限）
+        // 2. 访问 https://gist.github.com 创建一个新的 Gist，文件名设为 quiz_results.json，内容为 []
+        // 3. 从 Gist URL 中获取 Gist ID（32位字符）
+        // 4. 将 token 和 gistId 填入下方配置
+        // 
+        // ⚠️ 注意：如果代码是公开的，token 会被暴露。建议使用 Secret Gist。
+        const ONLINE_SAVE_CONFIG = {
+            enabled: true, // 设置为 true 启用线上保存
+            type: 'gist', // 'gist' 或 'webhook'
+            gistToken: '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', // GitHub Personal Access Token（格式：ghp_xxxxxxxxxxxx）
+            gistId: '41cba8f8ff95d10be8249902c27e1a83', // GitHub Gist ID（32位字符，从 Gist URL 中获取）
+            webhookUrl: '' // Webhook URL（如 Google Apps Script Web App URL）
+        };
 
-// 三关标题 + 勋章名
-const STAGES = [
-  { key:"stage1", name:"第一关：雷锋基础知多少", level:"入门级", medal:"初心章" },
-  { key:"stage2", name:"第二关：雷锋事迹大闯关", level:"进阶级", medal:"力行章" },
-  { key:"stage3", name:"第三关：雷锋精神深领悟", level:"高阶级", medal:"传扬章" }
-];
+        // 三关标题 + 勋章名
+        const STAGES = [
+            { key: "stage1", name: "第一关：雷锋基础知多少", level: "入门级", medal: "初心章" },
+            { key: "stage2", name: "第二关：雷锋事迹大闯关", level: "进阶级", medal: "力行章" },
+            { key: "stage3", name: "第三关：雷锋精神深领悟", level: "高阶级", medal: "传扬章" }
+        ];
 
-/* -------------------------
-   题库：来自你的 PDF（共 59 题，缺少第56题）
-   下面按 20 / 20 / 19 分配
-------------------------- */
+        /* -------------------------
+           题库：来自你的 PDF（共 59 题，缺少第56题）
+           下面按 20 / 20 / 19 分配
+        ------------------------- */
 
-const Q_STAGE1 = [
-  {"id":1,"q":"在鞍钢，雷锋几次被称为标兵？","options":{"A":"1次","B":"2次","C":"3次","D":"4次"},"answer":"C"},
-  {"id":2,"q":"1963年1月7日，国防部命名雷锋生前所在的班为","options":{"A":"雷锋班","B":"模范班","C":"标兵班","D":"红旗班"},"answer":"A"},
-  {"id":3,"q":"雷锋在什么地方出生？","options":{"A":"湖南省","B":"湖北省","C":"河南省","D":"河北省"},"answer":"A"},
-  {"id":5,"q":"1960年11月23日，沈阳军区工程兵党委授予雷锋称号。","options":{"A":"先进工作者","B":"模范共青团员","C":"青年社会主义建设积极分子","D":"劳动模范"},"answer":"B"},
-  {"id":6,"q":"由于他热心辅导少年先锋队，共青团中央特决定追认他为“全国优秀少先队辅导员”。请问是在决定的？","options":{"A":"1963年3月23日","B":"1964年3月23日","C":"1965年3月23日","D":"1960年1月18号"},"answer":"A"},
-  {"id":8,"q":"雷锋精神又叫什么?","options":{"A":"共产主义精神","B":"集体主义精神","C":"爱国主义精神","D":"螺丝钉精神"},"answer":"D"},
-  {"id":9,"q":"雷锋的日记一共多少篇？","options":{"A":"150篇","B":"152篇","C":"154篇","D":"156篇"},"answer":"B"},
-  {"id":11,"q":"1963年3月5日，毛泽东题词","options":{"A":"向雷锋同志学习","B":"向雷锋学习","C":"学习雷锋好榜样","D":"雷锋精神永放光芒"},"answer":"A"},
-  {"id":13,"q":"雷锋的出生日期是","options":{"A":"1940年12月18日","B":"1940年12月8日","C":"1940年12月28日","D":"1940年11月18日"},"answer":"A"},
-  {"id":15,"q":"雷锋在部队当过什么？","options":{"A":"排长","B":"连长","C":"班长","D":"师长"},"answer":"C"},
-  {"id":16,"q":"雷锋被评为“模范共青团员”的时间是","options":{"A":"1960年10月23日","B":"1960年11月23日","C":"1961年11月23日","D":"1962年11月23日"},"answer":"B"},
-  {"id":18,"q":"全国第一个学习雷锋的积极分子、并被誉为“雷锋式战士”的是","options":{"A":"王杰","B":"郭明义","C":"焦裕禄","D":"赖宁"},"answer":"A"},
-  {"id":19,"q":"“学习雷锋好榜样”这首歌是由谁作词？","options":{"A":"洪源","B":"郑南","C":"曹火星","D":"李劫夫"},"answer":"A"},
-  {"id":21,"q":"雷锋在军队的职务是","options":{"A":"排长","B":"班长","C":"连长","D":"司机"},"answer":"D"},
-  {"id":24,"q":"雷锋入伍后，所在的部队是","options":{"A":"沈阳军区工程兵某部","B":"北京军区某部","C":"广州军区某部","D":"南京军区某部"},"answer":"A"},
-  {"id":28,"q":"雷锋的牺牲日期是","options":{"A":"1962年8月15日","B":"1963年8月15日","C":"1964年8月15日","D":"1961年8月15日"},"answer":"A"},
-  {"id":30,"q":"“学雷锋纪念日”是每年的","options":{"A":"3月5日","B":"5月1日","C":"7月1日","D":"12月13日"},"answer":"A"},
-  {"id":34,"q":"雷锋在部队参加的兵种是","options":{"A":"工程兵","B":"炮兵","C":"海军","D":"空军"},"answer":"A"},
-  {"id":38,"q":"雷锋的籍贯是","options":{"A":"湖南长沙","B":"湖南湘潭","C":"湖南望城","D":"湖南衡阳"},"answer":"C"},
-  {"id":43,"q":"雷锋牺牲时的年龄是","options":{"A":"20岁","B":"21岁","C":"22岁","D":"23岁"},"answer":"B"}
-];
+        const Q_STAGE1 = [
+            { "id": 1, "q": "在鞍钢，雷锋几次被称为标兵？", "options": { "A": "1次", "B": "2次", "C": "3次", "D": "4次" }, "answer": "C" },
+            { "id": 2, "q": "1963年1月7日，国防部命名雷锋生前所在的班为", "options": { "A": "雷锋班", "B": "模范班", "C": "标兵班", "D": "红旗班" }, "answer": "A" },
+            { "id": 3, "q": "雷锋在什么地方出生？", "options": { "A": "湖南省", "B": "湖北省", "C": "河南省", "D": "河北省" }, "answer": "A" },
+            { "id": 5, "q": "1960年11月23日，沈阳军区工程兵党委授予雷锋称号。", "options": { "A": "先进工作者", "B": "模范共青团员", "C": "青年社会主义建设积极分子", "D": "劳动模范" }, "answer": "B" },
+            { "id": 6, "q": "由于他热心辅导少年先锋队，共青团中央特决定追认他为“全国优秀少先队辅导员”。请问是在决定的？", "options": { "A": "1963年3月23日", "B": "1964年3月23日", "C": "1965年3月23日", "D": "1960年1月18号" }, "answer": "A" },
+            { "id": 8, "q": "雷锋精神又叫什么?", "options": { "A": "共产主义精神", "B": "集体主义精神", "C": "爱国主义精神", "D": "螺丝钉精神" }, "answer": "D" },
+            { "id": 9, "q": "雷锋的日记一共多少篇？", "options": { "A": "150篇", "B": "152篇", "C": "154篇", "D": "156篇" }, "answer": "B" },
+            { "id": 11, "q": "1963年3月5日，毛泽东题词", "options": { "A": "向雷锋同志学习", "B": "向雷锋学习", "C": "学习雷锋好榜样", "D": "雷锋精神永放光芒" }, "answer": "A" },
+            { "id": 13, "q": "雷锋的出生日期是", "options": { "A": "1940年12月18日", "B": "1940年12月8日", "C": "1940年12月28日", "D": "1940年11月18日" }, "answer": "A" },
+            { "id": 15, "q": "雷锋在部队当过什么？", "options": { "A": "排长", "B": "连长", "C": "班长", "D": "师长" }, "answer": "C" },
+            { "id": 16, "q": "雷锋被评为“模范共青团员”的时间是", "options": { "A": "1960年10月23日", "B": "1960年11月23日", "C": "1961年11月23日", "D": "1962年11月23日" }, "answer": "B" },
+            { "id": 18, "q": "全国第一个学习雷锋的积极分子、并被誉为“雷锋式战士”的是", "options": { "A": "王杰", "B": "郭明义", "C": "焦裕禄", "D": "赖宁" }, "answer": "A" },
+            { "id": 19, "q": "“学习雷锋好榜样”这首歌是由谁作词？", "options": { "A": "洪源", "B": "郑南", "C": "曹火星", "D": "李劫夫" }, "answer": "A" },
+            { "id": 21, "q": "雷锋在军队的职务是", "options": { "A": "排长", "B": "班长", "C": "连长", "D": "司机" }, "answer": "D" },
+            { "id": 24, "q": "雷锋入伍后，所在的部队是", "options": { "A": "沈阳军区工程兵某部", "B": "北京军区某部", "C": "广州军区某部", "D": "南京军区某部" }, "answer": "A" },
+            { "id": 28, "q": "雷锋的牺牲日期是", "options": { "A": "1962年8月15日", "B": "1963年8月15日", "C": "1964年8月15日", "D": "1961年8月15日" }, "answer": "A" },
+            { "id": 30, "q": "“学雷锋纪念日”是每年的", "options": { "A": "3月5日", "B": "5月1日", "C": "7月1日", "D": "12月13日" }, "answer": "A" },
+            { "id": 34, "q": "雷锋在部队参加的兵种是", "options": { "A": "工程兵", "B": "炮兵", "C": "海军", "D": "空军" }, "answer": "A" },
+            { "id": 38, "q": "雷锋的籍贯是", "options": { "A": "湖南长沙", "B": "湖南湘潭", "C": "湖南望城", "D": "湖南衡阳" }, "answer": "C" },
+            { "id": 43, "q": "雷锋牺牲时的年龄是", "options": { "A": "20岁", "B": "21岁", "C": "22岁", "D": "23岁" }, "answer": "B" }
+        ];
 
-const Q_STAGE2 = [
-  {"id":4,"q":"雷锋在鞍山和弓长岭焦化厂工作期间，曾18次被评为红旗手，并荣获的光荣称号。","options":{"A":"先进工作者","B":"模范共青团员","C":"共青团员标兵","D":"青年社会主义建设积极分子"},"answer":"D"},
-  {"id":7,"q":"雷锋同志因何事而牺牲？","options":{"A":"交通事故","B":"救人牺牲","C":"疾病","D":"意外事故"},"answer":"B"},
-  {"id":10,"q":"雷锋在工作中一贯保持艰苦奋斗的作风，他用省下来的钱做了许多好事，其中包括：为灾区捐款、帮助困难群众、支持社会主义建设等。下列哪项不属于他省钱做的好事？","options":{"A":"为灾区捐款","B":"帮助困难群众","C":"支持社会主义建设","D":"购买名贵手表"},"answer":"D"},
-  {"id":14,"q":"雷锋入伍后驾驶的车辆是","options":{"A":"解放牌汽车","B":"东风牌汽车","C":"红旗牌汽车","D":"长江牌汽车"},"answer":"A"},
-  {"id":17,"q":"雷锋曾在上写下“我要把有限的生命投入到无限的为人民服务之中去”。","options":{"A":"书信","B":"日记","C":"诗歌","D":"文章"},"answer":"B"},
-  {"id":20,"q":"雷锋在鞍钢工作期间，曾被评为标兵","options":{"A":"1次","B":"2次","C":"3次","D":"4次"},"answer":"C"},
-  {"id":22,"q":"雷锋在部队多次立功受奖，其中包括","options":{"A":"一次二等功","B":"两次三等功","C":"三次二等功","D":"四次一等功"},"answer":"B"},
-  {"id":27,"q":"雷锋在部队加入中国共产党的时间是","options":{"A":"1960年11月8日","B":"1961年11月8日","C":"1962年11月8日","D":"1963年11月8日"},"answer":"B"},
-  {"id":29,"q":"雷锋在鞍钢曾担任","options":{"A":"推土机手","B":"拖拉机手","C":"钢炉工","D":"煤矿工"},"answer":"A"},
-  {"id":32,"q":"雷锋在鞍钢被评为“先进生产者”的次数是","options":{"A":"1次","B":"2次","C":"3次","D":"4次"},"answer":"B"},
-  {"id":33,"q":"雷锋在鞍钢工作时，曾被评为“青年社会主义建设积极分子”的次数是","options":{"A":"1次","B":"2次","C":"3次","D":"4次"},"answer":"A"},
-  {"id":41,"q":"雷锋在部队曾被授予“节约标兵”的称号。","options":{"A":"正确","B":"错误","C":"不确定","D":"以上都不是"},"answer":"A"},
-  {"id":42,"q":"雷锋在鞍钢工作期间，曾被评为“红旗手”次。","options":{"A":"16","B":"17","C":"18","D":"19"},"answer":"C"},
-  {"id":44,"q":"雷锋曾在火车上帮助一位大嫂找孩子，并把自己的座位让给她。","options":{"A":"正确","B":"错误","C":"不确定","D":"以上都不是"},"answer":"A"},
-  {"id":45,"q":"雷锋曾在雨中护送一位老太太回家。","options":{"A":"正确","B":"错误","C":"不确定","D":"以上都不是"},"answer":"A"},
-  {"id":49,"q":"雷锋曾向灾区捐款元。","options":{"A":"100","B":"200","C":"300","D":"400"},"answer":"A"},
-  {"id":50,"q":"雷锋曾把自己省下的钱寄给战友的母亲。","options":{"A":"正确","B":"错误","C":"不确定","D":"以上都不是"},"answer":"A"},
-  {"id":57,"q":"雷锋精神的核心是","options":{"A":"艰苦奋斗","B":"为人民服务","C":"爱岗敬业","D":"助人为乐"},"answer":"B"},
-  {"id":58,"q":"“把有限的生命投入到无限的为人民服务之中去”出自雷锋的","options":{"A":"日记","B":"演讲","C":"小说","D":"报道"},"answer":"A"},
-  {"id":60,"q":"雷锋在一次外出执行任务途中，下车帮助一位大娘，最后还把自己的钱给了她。","options":{"A":"正确","B":"错误","C":"不确定","D":"以上都不是"},"answer":"A"}
-];
+        const Q_STAGE2 = [
+            { "id": 4, "q": "雷锋在鞍山和弓长岭焦化厂工作期间，曾18次被评为红旗手，并荣获的光荣称号。", "options": { "A": "先进工作者", "B": "模范共青团员", "C": "共青团员标兵", "D": "青年社会主义建设积极分子" }, "answer": "D" },
+            { "id": 7, "q": "雷锋同志因何事而牺牲？", "options": { "A": "交通事故", "B": "救人牺牲", "C": "疾病", "D": "意外事故" }, "answer": "B" },
+            { "id": 10, "q": "雷锋在工作中一贯保持艰苦奋斗的作风，他用省下来的钱做了许多好事，其中包括：为灾区捐款、帮助困难群众、支持社会主义建设等。下列哪项不属于他省钱做的好事？", "options": { "A": "为灾区捐款", "B": "帮助困难群众", "C": "支持社会主义建设", "D": "购买名贵手表" }, "answer": "D" },
+            { "id": 14, "q": "雷锋入伍后驾驶的车辆是", "options": { "A": "解放牌汽车", "B": "东风牌汽车", "C": "红旗牌汽车", "D": "长江牌汽车" }, "answer": "A" },
+            { "id": 17, "q": "雷锋曾在上写下“我要把有限的生命投入到无限的为人民服务之中去”。", "options": { "A": "书信", "B": "日记", "C": "诗歌", "D": "文章" }, "answer": "B" },
+            { "id": 20, "q": "雷锋在鞍钢工作期间，曾被评为标兵", "options": { "A": "1次", "B": "2次", "C": "3次", "D": "4次" }, "answer": "C" },
+            { "id": 22, "q": "雷锋在部队多次立功受奖，其中包括", "options": { "A": "一次二等功", "B": "两次三等功", "C": "三次二等功", "D": "四次一等功" }, "answer": "B" },
+            { "id": 27, "q": "雷锋在部队加入中国共产党的时间是", "options": { "A": "1960年11月8日", "B": "1961年11月8日", "C": "1962年11月8日", "D": "1963年11月8日" }, "answer": "B" },
+            { "id": 29, "q": "雷锋在鞍钢曾担任", "options": { "A": "推土机手", "B": "拖拉机手", "C": "钢炉工", "D": "煤矿工" }, "answer": "A" },
+            { "id": 32, "q": "雷锋在鞍钢被评为“先进生产者”的次数是", "options": { "A": "1次", "B": "2次", "C": "3次", "D": "4次" }, "answer": "B" },
+            { "id": 33, "q": "雷锋在鞍钢工作时，曾被评为“青年社会主义建设积极分子”的次数是", "options": { "A": "1次", "B": "2次", "C": "3次", "D": "4次" }, "answer": "A" },
+            { "id": 41, "q": "雷锋在部队曾被授予“节约标兵”的称号。", "options": { "A": "正确", "B": "错误", "C": "不确定", "D": "以上都不是" }, "answer": "A" },
+            { "id": 42, "q": "雷锋在鞍钢工作期间，曾被评为“红旗手”次。", "options": { "A": "16", "B": "17", "C": "18", "D": "19" }, "answer": "C" },
+            { "id": 44, "q": "雷锋曾在火车上帮助一位大嫂找孩子，并把自己的座位让给她。", "options": { "A": "正确", "B": "错误", "C": "不确定", "D": "以上都不是" }, "answer": "A" },
+            { "id": 45, "q": "雷锋曾在雨中护送一位老太太回家。", "options": { "A": "正确", "B": "错误", "C": "不确定", "D": "以上都不是" }, "answer": "A" },
+            { "id": 49, "q": "雷锋曾向灾区捐款元。", "options": { "A": "100", "B": "200", "C": "300", "D": "400" }, "answer": "A" },
+            { "id": 50, "q": "雷锋曾把自己省下的钱寄给战友的母亲。", "options": { "A": "正确", "B": "错误", "C": "不确定", "D": "以上都不是" }, "answer": "A" },
+            { "id": 57, "q": "雷锋精神的核心是", "options": { "A": "艰苦奋斗", "B": "为人民服务", "C": "爱岗敬业", "D": "助人为乐" }, "answer": "B" },
+            { "id": 58, "q": "“把有限的生命投入到无限的为人民服务之中去”出自雷锋的", "options": { "A": "日记", "B": "演讲", "C": "小说", "D": "报道" }, "answer": "A" },
+            { "id": 60, "q": "雷锋在一次外出执行任务途中，下车帮助一位大娘，最后还把自己的钱给了她。", "options": { "A": "正确", "B": "错误", "C": "不确定", "D": "以上都不是" }, "answer": "A" }
+        ];
 
-const Q_STAGE3 = [
-  {"id":12,"q":"雷锋精神的实质是","options":{"A":"个人主义","B":"集体主义","C":"享乐主义","D":"拜金主义"},"answer":"B"},
-  {"id":23,"q":"雷锋精神的时代内涵包括","options":{"A":"服务人民、助人为乐","B":"爱岗敬业、锐意进取","C":"艰苦奋斗、勤俭节约","D":"以上都是"},"answer":"D"},
-  {"id":25,"q":"在新时代，学习雷锋更强调","options":{"A":"形式","B":"口号","C":"把精神转化为行动","D":"只做一次活动"},"answer":"C"},
-  {"id":26,"q":"雷锋精神体现的价值取向是","options":{"A":"利己","B":"利他","C":"中立","D":"功利"},"answer":"B"},
-  {"id":31,"q":"雷锋精神的精髓是","options":{"A":"忠于革命忠于党","B":"全心全意为人民服务","C":"刻苦学习","D":"勇于创新"},"answer":"B"},
-  {"id":35,"q":"“一滴水只有放进大海里才永远不会干涸”强调的是","options":{"A":"个人与集体","B":"金钱的重要","C":"娱乐至上","D":"个人利益第一"},"answer":"A"},
-  {"id":36,"q":"雷锋精神与志愿服务精神的关系是","options":{"A":"无关","B":"矛盾","C":"一脉相承","D":"完全相反"},"answer":"C"},
-  {"id":37,"q":"学习雷锋最关键的是","options":{"A":"拍照打卡","B":"写心得","C":"长期坚持、融入日常","D":"只在纪念日做一次"},"answer":"C"},
-  {"id":39,"q":"雷锋精神在当代最典型的体现之一是","options":{"A":"攀比","B":"志愿服务","C":"炫耀","D":"躺平"},"answer":"B"},
-  {"id":40,"q":"雷锋精神倡导的工作态度更接近","options":{"A":"敷衍","B":"摆烂","C":"螺丝钉精神","D":"功利主义"},"answer":"C"},
-  {"id":46,"q":"雷锋精神强调“助人为乐”，其根本出发点是","options":{"A":"获得回报","B":"全心全意为人民服务","C":"出名","D":"完成任务"},"answer":"B"},
-  {"id":47,"q":"雷锋精神强调“爱岗敬业”，更接近下面哪种表达","options":{"A":"干一行爱一行","B":"只挑轻松的","C":"见利忘义","D":"得过且过"},"answer":"A"},
-  {"id":48,"q":"雷锋精神强调“艰苦奋斗、勤俭节约”，反对的是","options":{"A":"勤俭","B":"奋斗","C":"铺张浪费","D":"节约"},"answer":"C"},
-  {"id":51,"q":"学习雷锋需要把“精神”落实到","options":{"A":"口头","B":"行动","C":"形式","D":"宣传册"},"answer":"B"},
-  {"id":52,"q":"雷锋精神具有鲜明的","options":{"A":"时代性","B":"人民性","C":"实践性","D":"以上都是"},"answer":"D"},
-  {"id":53,"q":"雷锋精神对青少年的意义更突出在","options":{"A":"塑造价值观","B":"提高攀比能力","C":"强调享乐","D":"追求名利"},"answer":"A"},
-  {"id":54,"q":"雷锋精神体现了社会主义核心价值观中的","options":{"A":"友善","B":"敬业","C":"奉献","D":"以上都是"},"answer":"D"},
-  {"id":55,"q":"“学雷锋”最反对的做法是","options":{"A":"长期坚持","B":"日常化","C":"走过场","D":"立足岗位"},"answer":"C"},
-  {"id":59,"q":"在新形势下涌现的以雷锋名字命名的先进集体和先进个人不计其数，其下就是雷锋精神的生动体现？","options":{"A":"红十字会","B":"希望工程","C":"扶贫工程","D":"青年志愿者行动"},"answer":"D"}
-];
+        const Q_STAGE3 = [
+            { "id": 12, "q": "雷锋精神的实质是", "options": { "A": "个人主义", "B": "集体主义", "C": "享乐主义", "D": "拜金主义" }, "answer": "B" },
+            { "id": 23, "q": "雷锋精神的时代内涵包括", "options": { "A": "服务人民、助人为乐", "B": "爱岗敬业、锐意进取", "C": "艰苦奋斗、勤俭节约", "D": "以上都是" }, "answer": "D" },
+            { "id": 25, "q": "在新时代，学习雷锋更强调", "options": { "A": "形式", "B": "口号", "C": "把精神转化为行动", "D": "只做一次活动" }, "answer": "C" },
+            { "id": 26, "q": "雷锋精神体现的价值取向是", "options": { "A": "利己", "B": "利他", "C": "中立", "D": "功利" }, "answer": "B" },
+            { "id": 31, "q": "雷锋精神的精髓是", "options": { "A": "忠于革命忠于党", "B": "全心全意为人民服务", "C": "刻苦学习", "D": "勇于创新" }, "answer": "B" },
+            { "id": 35, "q": "“一滴水只有放进大海里才永远不会干涸”强调的是", "options": { "A": "个人与集体", "B": "金钱的重要", "C": "娱乐至上", "D": "个人利益第一" }, "answer": "A" },
+            { "id": 36, "q": "雷锋精神与志愿服务精神的关系是", "options": { "A": "无关", "B": "矛盾", "C": "一脉相承", "D": "完全相反" }, "answer": "C" },
+            { "id": 37, "q": "学习雷锋最关键的是", "options": { "A": "拍照打卡", "B": "写心得", "C": "长期坚持、融入日常", "D": "只在纪念日做一次" }, "answer": "C" },
+            { "id": 39, "q": "雷锋精神在当代最典型的体现之一是", "options": { "A": "攀比", "B": "志愿服务", "C": "炫耀", "D": "躺平" }, "answer": "B" },
+            { "id": 40, "q": "雷锋精神倡导的工作态度更接近", "options": { "A": "敷衍", "B": "摆烂", "C": "螺丝钉精神", "D": "功利主义" }, "answer": "C" },
+            { "id": 46, "q": "雷锋精神强调“助人为乐”，其根本出发点是", "options": { "A": "获得回报", "B": "全心全意为人民服务", "C": "出名", "D": "完成任务" }, "answer": "B" },
+            { "id": 47, "q": "雷锋精神强调“爱岗敬业”，更接近下面哪种表达", "options": { "A": "干一行爱一行", "B": "只挑轻松的", "C": "见利忘义", "D": "得过且过" }, "answer": "A" },
+            { "id": 48, "q": "雷锋精神强调“艰苦奋斗、勤俭节约”，反对的是", "options": { "A": "勤俭", "B": "奋斗", "C": "铺张浪费", "D": "节约" }, "answer": "C" },
+            { "id": 51, "q": "学习雷锋需要把“精神”落实到", "options": { "A": "口头", "B": "行动", "C": "形式", "D": "宣传册" }, "answer": "B" },
+            { "id": 52, "q": "雷锋精神具有鲜明的", "options": { "A": "时代性", "B": "人民性", "C": "实践性", "D": "以上都是" }, "answer": "D" },
+            { "id": 53, "q": "雷锋精神对青少年的意义更突出在", "options": { "A": "塑造价值观", "B": "提高攀比能力", "C": "强调享乐", "D": "追求名利" }, "answer": "A" },
+            { "id": 54, "q": "雷锋精神体现了社会主义核心价值观中的", "options": { "A": "友善", "B": "敬业", "C": "奉献", "D": "以上都是" }, "answer": "D" },
+            { "id": 55, "q": "“学雷锋”最反对的做法是", "options": { "A": "长期坚持", "B": "日常化", "C": "走过场", "D": "立足岗位" }, "answer": "C" },
+            { "id": 59, "q": "在新形势下涌现的以雷锋名字命名的先进集体和先进个人不计其数，其下就是雷锋精神的生动体现？", "options": { "A": "红十字会", "B": "希望工程", "C": "扶贫工程", "D": "青年志愿者行动" }, "answer": "D" }
+        ];
 
-/* -------------------------
-   状态管理
-------------------------- */
-const STORE_KEY = "lei_feng_quiz_v1";
-const view = document.getElementById("view");
-const sub = document.getElementById("sub");
+        /* -------------------------
+           状态管理
+        ------------------------- */
+        const STORE_KEY = "lei_feng_quiz_v1";
+        const view = document.getElementById("view");
+        const sub = document.getElementById("sub");
 
-let state = loadState() || {
-  stageIndex: 0,
-  qIndex: 0,
-  correct: 0,
-  wrong: 0,
-  medals: { stage1:false, stage2:false, stage3:false },
-  records: loadRecords(),
-  musicOn: false,
-  finished: false
-};
+        let state = loadState() || {
+            studentId: "",
+            stageIndex: 0,
+            qIndex: 0,
+            correct: 0,
+            wrong: 0,
+            medals: { stage1: false, stage2: false, stage3: false },
+            records: loadRecords(),
+            musicOn: false,
+            finished: false,
+            stageResults: [] // 记录每关的答题结果
+        };
 
-function loadRecords(){
-  try{
-    const raw = localStorage.getItem(STORE_KEY+"_records");
-    return raw ? JSON.parse(raw) : [];
-  }catch{ return []; }
-}
-function saveRecords(){
-  localStorage.setItem(STORE_KEY+"_records", JSON.stringify(state.records));
-}
-function saveState(){
-  localStorage.setItem(STORE_KEY, JSON.stringify(state));
-}
-function loadState(){
-  try{
-    const raw = localStorage.getItem(STORE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  }catch{ return null; }
-}
-function resetAll(){
-  localStorage.removeItem(STORE_KEY);
-  // records 也一起清掉，如你想保留记录就注释下一行
-  // localStorage.removeItem(STORE_KEY+"_records");
-  state = {
-    stageIndex: 0, qIndex: 0, correct: 0, wrong: 0,
-    medals: {stage1:false, stage2:false, stage3:false},
-    records: loadRecords(),
-    musicOn: false,
-    finished:false
-  };
-  stopMusic();
-  renderHome();
-}
-document.getElementById("resetBtn").addEventListener("click", resetAll);
+        function loadRecords() {
+            try {
+                const raw = localStorage.getItem(STORE_KEY + "_records");
+                return raw ? JSON.parse(raw) : [];
+            } catch { return []; }
+        }
+        function saveRecords() {
+            localStorage.setItem(STORE_KEY + "_records", JSON.stringify(state.records));
+        }
+        function saveState() {
+            localStorage.setItem(STORE_KEY, JSON.stringify(state));
+        }
+        function loadState() {
+            try {
+                const raw = localStorage.getItem(STORE_KEY);
+                return raw ? JSON.parse(raw) : null;
+            } catch { return null; }
+        }
+        function resetAll() {
+            localStorage.removeItem(STORE_KEY);
+            // records 也一起清掉，如你想保留记录就注释下一行
+            // localStorage.removeItem(STORE_KEY+"_records");
+            state = {
+                studentId: "",
+                stageIndex: 0, qIndex: 0, correct: 0, wrong: 0,
+                medals: { stage1: false, stage2: false, stage3: false },
+                records: loadRecords(),
+                musicOn: false,
+                finished: false,
+                stageResults: []
+            };
+            stopMusic();
+            renderHome();
+        }
+        document.getElementById("resetBtn").addEventListener("click", resetAll);
 
-/* -------------------------
-   音乐控制
-------------------------- */
-const bgm = document.getElementById("bgm");
-const musicBtn = document.getElementById("musicBtn");
-function updateMusicBtn(){
-  musicBtn.textContent = "♫ 音乐：" + (state.musicOn ? "开" : "关");
-}
-async function startMusic(){
-  try{
-    await bgm.play();
-    state.musicOn = true;
-    updateMusicBtn(); saveState();
-  }catch(e){
-    // 移动端若未交互会失败，等用户点击开始按钮时再试
-  }
-}
-function stopMusic(){
-  bgm.pause();
-  bgm.currentTime = 0;
-  state.musicOn = false;
-  updateMusicBtn(); saveState();
-}
-musicBtn.addEventListener("click", async ()=>{
-  if(state.musicOn){ stopMusic(); }
-  else{ await startMusic(); }
-});
+        /* -------------------------
+           音乐控制
+        ------------------------- */
+        const bgm = document.getElementById("bgm");
+        const musicBtn = document.getElementById("musicBtn");
+        function updateMusicBtn() {
+            musicBtn.textContent = "♫ 音乐：" + (state.musicOn ? "开" : "关");
+        }
+        async function startMusic() {
+            try {
+                await bgm.play();
+                state.musicOn = true;
+                updateMusicBtn(); saveState();
+            } catch (e) {
+                // 移动端若未交互会失败，等用户点击开始按钮时再试
+            }
+        }
+        function stopMusic() {
+            bgm.pause();
+            bgm.currentTime = 0;
+            state.musicOn = false;
+            updateMusicBtn(); saveState();
+        }
+        musicBtn.addEventListener("click", async () => {
+            if (state.musicOn) { stopMusic(); }
+            else { await startMusic(); }
+        });
 
-/* -------------------------
-   工具函数
-------------------------- */
-function stageQuestions(idx){
-  if(idx===0) return Q_STAGE1;
-  if(idx===1) return Q_STAGE2;
-  return Q_STAGE3;
-}
-function stagePassMin(idx){
-  if(idx===0) return PASS.stage1_min_correct;
-  if(idx===1) return PASS.stage2_min_correct;
-  return PASS.stage3_min_correct;
-}
-function stageKey(idx){ return STAGES[idx].key; }
-function fmtNow(){
-  const d = new Date();
-  const pad = (n)=> String(n).padStart(2,"0");
-  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-}
-function escapeCSV(s){
-  const t = String(s ?? "");
-  if(/[",\n]/.test(t)) return `"${t.replace(/"/g,'""')}"`;
-  return t;
-}
+        /* -------------------------
+           工具函数
+        ------------------------- */
+        function stageQuestions(idx) {
+            if (idx === 0) return Q_STAGE1;
+            if (idx === 1) return Q_STAGE2;
+            return Q_STAGE3;
+        }
+        function stagePassMin(idx) {
+            if (idx === 0) return PASS.stage1_min_correct;
+            if (idx === 1) return PASS.stage2_min_correct;
+            return PASS.stage3_min_correct;
+        }
+        function stageKey(idx) { return STAGES[idx].key; }
+        function fmtNow() {
+            const d = new Date();
+            const pad = (n) => String(n).padStart(2, "0");
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+        }
+        function escapeCSV(s) {
+            const t = String(s ?? "");
+            if (/[",\n]/.test(t)) return `"${t.replace(/"/g, '""')}"`;
+            return t;
+        }
 
-/* -------------------------
-   渲染：主页
-------------------------- */
-function renderHome(){
-  sub.textContent = "三关闯关，集齐勋章，完成通关抽奖";
-  const medals = state.medals;
-  view.innerHTML = `
+        /* -------------------------
+           渲染：主页
+        ------------------------- */
+        function renderHome() {
+            sub.textContent = "三关闯关，集齐勋章，完成通关抽奖";
+            const medals = state.medals;
+
+            // 如果已有学号，显示学号信息；否则显示输入表单
+            const studentIdSection = state.studentId
+                ? `<div class="smallnote" style="margin-top:10px;padding:10px;background:rgba(0,0,0,.04);border-radius:8px">
+                    <b>学号：</b>${state.studentId}
+                    <button class="btn ghost" id="changeStudentIdBtn" style="margin-left:10px;padding:6px 10px;font-size:12px">修改</button>
+                   </div>`
+                : `<div class="field" style="margin-top:10px">
+                    <label><b>学号</b>（必填）</label>
+                    <input id="studentIdInput" placeholder="请输入学号" />
+                    <div class="smallnote">请填写您的学号，用于统计答题结果</div>
+                  </div>`;
+
+            view.innerHTML = `
     <div class="row">
       <div class="card" style="flex:1 1 520px">
         <div class="badgebar">
@@ -415,67 +575,103 @@ function renderHome(){
         </div>
         <div class="big" style="margin-top:10px">开始挑战</div>
         <div class="smallnote">规则：每关答题达到通关线才能进入下一关，否则本次挑战失败。</div>
-        <div class="smallnote">提示：首次点击“开始”后，音乐才允许播放（浏览器限制）。</div>
-        <div class="footer">
+        <div class="smallnote">提示：首次点击"开始"后，音乐才允许播放（浏览器限制）。</div>
+        
+        ${studentIdSection}
+        
+        <div class="footer" style="margin-top:12px">
           <div class="hint">
             通关线：第一关 ≥ ${PASS.stage1_min_correct}/20，第二关 ≥ ${PASS.stage2_min_correct}/20，第三关 ≥ ${PASS.stage3_min_correct}/19
           </div>
           <div style="display:flex;gap:10px;flex-wrap:wrap">
             <button class="btn" id="startBtn">开始</button>
-            <button class="btn secondary" id="recordsBtn">查看通关名单</button>
           </div>
         </div>
       </div>
 
       <div class="card" style="flex:1 1 300px">
         <div class="big">关卡</div>
-        <div class="smallnote">${STAGES.map((s,i)=>`<div style="margin-top:6px"><span class="pill">第${i+1}关</span>${s.name}（${s.level}）</div>`).join("")}</div>
+        <div class="smallnote">${STAGES.map((s, i) => `<div style="margin-top:6px"><span class="pill">第${i + 1}关</span>${s.name}（${s.level}）</div>`).join("")}</div>
       </div>
     </div>
   `;
-  document.getElementById("startBtn").addEventListener("click", async ()=>{
-    // 用户交互后尝试播放音乐
-    if(!state.musicOn) await startMusic();
-    startNewRun();
-  });
-  document.getElementById("recordsBtn").addEventListener("click", renderRecords);
-  updateMusicBtn();
-}
 
-function badgeHTML(name, on){
-  return `<div class="badge ${on ? "on":""}"><div class="dot"></div>${name}</div>`;
-}
+            const startBtn = document.getElementById("startBtn");
+            startBtn.addEventListener("click", async () => {
+                // 检查学号
+                if (!state.studentId) {
+                    const input = document.getElementById("studentIdInput");
+                    if (input) {
+                        const id = input.value.trim();
+                        if (!id) {
+                            alert("请先填写学号！");
+                            return;
+                        }
+                        state.studentId = id;
+                        saveState();
+                    } else {
+                        alert("请先填写学号！");
+                        return;
+                    }
+                }
 
-/* -------------------------
-   开始一轮新挑战（从第一关开始）
-------------------------- */
-function startNewRun(){
-  state.stageIndex = 0;
-  state.qIndex = 0;
-  state.correct = 0;
-  state.wrong = 0;
-  state.medals = { stage1:false, stage2:false, stage3:false };
-  state.finished = false;
-  saveState();
-  renderQuestion();
-}
+                // 用户交互后尝试播放音乐
+                if (!state.musicOn) await startMusic();
+                startNewRun();
+            });
 
-/* -------------------------
-   渲染：答题页
-------------------------- */
-function renderQuestion(feedback){
-  const sIdx = state.stageIndex;
-  const stage = STAGES[sIdx];
-  const qs = stageQuestions(sIdx);
-  const q = qs[state.qIndex];
+            const changeBtn = document.getElementById("changeStudentIdBtn");
+            if (changeBtn) {
+                changeBtn.addEventListener("click", () => {
+                    state.studentId = "";
+                    saveState();
+                    renderHome();
+                });
+            }
 
-  sub.textContent = `${stage.name}（${stage.level}）`;
+            updateMusicBtn();
+        }
 
-  const total = qs.length;
-  const done = state.qIndex; // 已完成题数
-  const pct = Math.round((done / total) * 100);
+        function badgeHTML(name, on) {
+            return `<div class="badge ${on ? "on" : ""}"><div class="dot"></div>${name}</div>`;
+        }
 
-  view.innerHTML = `
+        /* -------------------------
+           开始一轮新挑战（从第一关开始）
+        ------------------------- */
+        function startNewRun() {
+            if (!state.studentId) {
+                alert("请先填写学号！");
+                renderHome();
+                return;
+            }
+            state.stageIndex = 0;
+            state.qIndex = 0;
+            state.correct = 0;
+            state.wrong = 0;
+            state.medals = { stage1: false, stage2: false, stage3: false };
+            state.finished = false;
+            state.stageResults = []; // 重置答题结果
+            saveState();
+            renderQuestion();
+        }
+
+        /* -------------------------
+           渲染：答题页
+        ------------------------- */
+        function renderQuestion(feedback) {
+            const sIdx = state.stageIndex;
+            const stage = STAGES[sIdx];
+            const qs = stageQuestions(sIdx);
+            const q = qs[state.qIndex];
+
+            sub.textContent = `${stage.name}（${stage.level}）`;
+
+            const total = qs.length;
+            const done = state.qIndex; // 已完成题数
+            const pct = Math.round((done / total) * 100);
+
+            view.innerHTML = `
     <div class="row">
       <div class="card" style="flex:1 1 620px">
         <div class="badgebar">
@@ -487,14 +683,14 @@ function renderQuestion(feedback){
 
         <div class="meta">
           <div><b>题号</b>：${q.id}</div>
-          <div><b>进度</b>：${state.qIndex+1}/${total}</div>
+          <div><b>进度</b>：${state.qIndex + 1}/${total}</div>
           <div><b>本关正确</b>：${state.correct}（通关线 ≥ ${stagePassMin(sIdx)}）</div>
         </div>
 
         <h3 class="qtitle">${q.q}</h3>
 
         <div class="options" id="opts">
-          ${Object.entries(q.options).map(([k,v]) => `
+          ${Object.entries(q.options).map(([k, v]) => `
             <div class="opt" data-k="${k}">
               <div class="k">${k}</div>
               <div>${v}</div>
@@ -515,7 +711,7 @@ function renderQuestion(feedback){
         <div class="smallnote" style="margin-top:10px">
           正确：<b>${state.correct}</b><br/>
           错误：<b>${state.wrong}</b><br/>
-          本关剩余：<b>${total - (state.qIndex+1)}</b>
+          本关剩余：<b>${total - (state.qIndex + 1)}</b>
         </div>
         <div class="smallnote" style="margin-top:12px">
           规则：答完本关全部题后结算，达标才能进入下一关，不达标直接失败结束。
@@ -524,80 +720,91 @@ function renderQuestion(feedback){
     </div>
   `;
 
-  document.getElementById("quitBtn").addEventListener("click", ()=>{
-    renderHome();
-  });
+            document.getElementById("quitBtn").addEventListener("click", () => {
+                renderHome();
+            });
 
-  const opts = document.getElementById("opts");
-  let locked = false;
-  opts.querySelectorAll(".opt").forEach(el=>{
-    el.addEventListener("click", ()=>{
-      if(locked) return;
-      locked = true;
-      const chosen = el.getAttribute("data-k");
-      const correct = q.answer;
+            const opts = document.getElementById("opts");
+            let locked = false;
+            opts.querySelectorAll(".opt").forEach(el => {
+                el.addEventListener("click", () => {
+                    if (locked) return;
+                    locked = true;
+                    const chosen = el.getAttribute("data-k");
+                    const correct = q.answer;
 
-      // 标记对错
-      opts.querySelectorAll(".opt").forEach(o=>{
-        const k = o.getAttribute("data-k");
-        if(k === correct) o.classList.add("correct");
-        if(k === chosen && chosen !== correct) o.classList.add("wrong");
-        o.style.pointerEvents = "none";
-      });
+                    // 标记对错
+                    opts.querySelectorAll(".opt").forEach(o => {
+                        const k = o.getAttribute("data-k");
+                        if (k === correct) o.classList.add("correct");
+                        if (k === chosen && chosen !== correct) o.classList.add("wrong");
+                        o.style.pointerEvents = "none";
+                    });
 
-      if(chosen === correct) state.correct += 1;
-      else state.wrong += 1;
+                    if (chosen === correct) state.correct += 1;
+                    else state.wrong += 1;
 
-      saveState();
+                    saveState();
 
-      // 0.8 秒后进入下一题或结算
-      setTimeout(()=>{
-        nextStep();
-      }, 800);
-    });
-  });
-}
+                    // 0.8 秒后进入下一题或结算
+                    setTimeout(() => {
+                        nextStep();
+                    }, 800);
+                });
+            });
+        }
 
-/* -------------------------
-   下一步：下一题 or 结算
-------------------------- */
-function nextStep(){
-  const sIdx = state.stageIndex;
-  const qs = stageQuestions(sIdx);
+        /* -------------------------
+           下一步：下一题 or 结算
+        ------------------------- */
+        function nextStep() {
+            const sIdx = state.stageIndex;
+            const qs = stageQuestions(sIdx);
 
-  if(state.qIndex < qs.length - 1){
-    state.qIndex += 1;
-    saveState();
-    renderQuestion();
-    return;
-  }
+            if (state.qIndex < qs.length - 1) {
+                state.qIndex += 1;
+                saveState();
+                renderQuestion();
+                return;
+            }
 
-  // 本关答完，结算
-  renderStageResult();
-}
+            // 本关答完，结算
+            renderStageResult();
+        }
 
-function renderStageResult(){
-  const sIdx = state.stageIndex;
-  const stage = STAGES[sIdx];
-  const qs = stageQuestions(sIdx);
-  const minCorrect = stagePassMin(sIdx);
-  const passed = state.correct >= minCorrect;
+        function renderStageResult() {
+            const sIdx = state.stageIndex;
+            const stage = STAGES[sIdx];
+            const qs = stageQuestions(sIdx);
+            const minCorrect = stagePassMin(sIdx);
+            const passed = state.correct >= minCorrect;
 
-  const total = qs.length;
-  const scoreLine = `${state.correct}/${total}`;
+            const total = qs.length;
+            const scoreLine = `${state.correct}/${total}`;
 
-  let msg = "";
-  if(passed){
-    state.medals[stageKey(sIdx)] = true;
-    msg = `通过！获得【${stage.medal}】`;
-  }else{
-    msg = "未达标，本次挑战失败";
-  }
-  saveState();
+            // 记录本关答题结果
+            state.stageResults.push({
+                stage: stage.name,
+                stageIndex: sIdx,
+                correct: state.correct,
+                wrong: state.wrong,
+                total: total,
+                passed: passed,
+                time: fmtNow()
+            });
 
-  sub.textContent = "关卡结算";
+            let msg = "";
+            if (passed) {
+                state.medals[stageKey(sIdx)] = true;
+                msg = `通过！获得【${stage.medal}】`;
+            } else {
+                msg = "未达标，本次挑战失败";
+            }
+            saveState();
 
-  view.innerHTML = `
+            sub.textContent = "关卡结算";
+
+            view.innerHTML = `
     <div class="card">
       <div class="badgebar" style="margin-bottom:10px">
         ${badgeHTML("初心章", state.medals.stage1)}
@@ -624,42 +831,48 @@ function renderStageResult(){
     </div>
   `;
 
-  document.getElementById("homeBtn").addEventListener("click", renderHome);
+            document.getElementById("homeBtn").addEventListener("click", renderHome);
 
-  const retry = document.getElementById("retryBtn");
-  if(retry){
-    retry.addEventListener("click", ()=>{
-      // 重开本关
-      state.qIndex = 0;
-      state.correct = 0;
-      state.wrong = 0;
-      saveState();
-      renderQuestion();
-    });
-  }
+            const retry = document.getElementById("retryBtn");
+            if (retry) {
+                retry.addEventListener("click", () => {
+                    // 重开本关
+                    state.qIndex = 0;
+                    state.correct = 0;
+                    state.wrong = 0;
+                    saveState();
+                    renderQuestion();
+                });
+            }
 
-  const nextBtn = document.getElementById("nextStageBtn");
-  if(nextBtn){
-    nextBtn.addEventListener("click", ()=>{
-      // 进入下一关，重置本关计数
-      state.stageIndex += 1;
-      state.qIndex = 0;
-      state.correct = 0;
-      state.wrong = 0;
-      saveState();
-      renderQuestion();
-    });
-  }
+            const nextBtn = document.getElementById("nextStageBtn");
+            if (nextBtn) {
+                nextBtn.addEventListener("click", () => {
+                    // 进入下一关，重置本关计数
+                    state.stageIndex += 1;
+                    state.qIndex = 0;
+                    state.correct = 0;
+                    state.wrong = 0;
+                    saveState();
+                    renderQuestion();
+                });
+            }
 
-  const finishBtn = document.getElementById("finishBtn");
-  if(finishBtn){
-    finishBtn.addEventListener("click", renderFinishForm);
-  }
-}
+            const finishBtn = document.getElementById("finishBtn");
+            if (finishBtn) {
+                finishBtn.addEventListener("click", renderFinishForm);
+            }
+        }
 
-function renderFinishForm(){
-  sub.textContent = "完全通关";
-  view.innerHTML = `
+        function renderFinishForm() {
+            sub.textContent = "完全通关";
+
+            // 计算总成绩
+            const totalCorrect = state.stageResults.reduce((sum, r) => sum + r.correct, 0);
+            const totalWrong = state.stageResults.reduce((sum, r) => sum + r.wrong, 0);
+            const totalQuestions = state.stageResults.reduce((sum, r) => sum + r.total, 0);
+
+            view.innerHTML = `
     <div class="row">
       <div class="card" style="flex:1 1 520px">
         <div class="badgebar">
@@ -668,84 +881,181 @@ function renderFinishForm(){
           ${badgeHTML("传扬章", true)}
         </div>
         <div class="big" style="margin-top:10px">恭喜完全通关！</div>
-        <div class="smallnote">填写信息后将进入抽奖名单（记录保存在本浏览器，并可导出 CSV）。</div>
-
-        <div class="field">
-          <label>姓名</label>
-          <input id="name" placeholder="请输入姓名" />
+        <div class="smallnote" style="margin-top:8px">
+          <b>学号：</b>${state.studentId}<br/>
+          <b>总成绩：</b>${totalCorrect}/${totalQuestions}（正确 ${totalCorrect} 题，错误 ${totalWrong} 题）
         </div>
-        <div class="field">
-          <label>手机号</label>
-          <input id="phone" placeholder="请输入手机号" inputmode="numeric" />
+        
+        <div class="smallnote" style="margin-top:12px;padding:10px;background:rgba(0,0,0,.04);border-radius:8px">
+          <b>各关成绩：</b><br/>
+          ${state.stageResults.map(r =>
+                `第${r.stageIndex + 1}关：${r.correct}/${r.total}（${r.passed ? '✓通过' : '✗未通过'}）`
+            ).join('<br/>')}
         </div>
 
-        <div class="footer">
-          <div class="hint" id="formHint"></div>
+        <div class="footer" style="margin-top:12px">
+          <div class="hint" id="formHint">答题结果已自动保存</div>
           <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <button class="btn" id="submitBtn">提交</button>
-            <button class="btn secondary" id="homeBtn2">返回首页</button>
+            <button class="btn" id="homeBtn2">返回首页</button>
           </div>
-        </div>
-
-        <div class="smallnote" style="margin-top:10px">
-          如果你希望“自动汇总到表格”，可以把这里的提交改为调用你自己的 Webhook（比如 Google Apps Script）。
         </div>
       </div>
 
       <div class="card" style="flex:1 1 300px">
-        <div class="big">通关记录</div>
+        <div class="big">答题统计</div>
         <div class="smallnote" style="margin-top:10px">
-          当前浏览器已保存：<b>${state.records.length}</b> 条记录
-        </div>
-        <div class="footer" style="margin-top:12px">
-          <div class="hint">可直接导出给你抽奖</div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <button class="btn secondary" id="exportBtn">导出 CSV</button>
-            <button class="btn ghost" id="recordsBtn2">查看名单</button>
-          </div>
+          <b>学号：</b>${state.studentId}<br/>
+          <b>总正确：</b>${totalCorrect} 题<br/>
+          <b>总错误：</b>${totalWrong} 题<br/>
+          <b>总题数：</b>${totalQuestions} 题<br/>
+          <b>完成时间：</b>${fmtNow()}
         </div>
       </div>
     </div>
   `;
 
-  document.getElementById("homeBtn2").addEventListener("click", renderHome);
-  document.getElementById("exportBtn").addEventListener("click", exportCSV);
-  document.getElementById("recordsBtn2").addEventListener("click", renderRecords);
+            document.getElementById("homeBtn2").addEventListener("click", renderHome);
 
-  document.getElementById("submitBtn").addEventListener("click", ()=>{
-    const name = document.getElementById("name").value.trim();
-    const phone = document.getElementById("phone").value.trim();
-    const hint = document.getElementById("formHint");
+            // 自动保存答题结果
+            saveQuizResult();
+        }
 
-    if(!name){ hint.textContent = "请填写姓名"; return; }
-    if(!/^1\\d{10}$/.test(phone)){ hint.textContent = "请填写正确的 11 位手机号"; return; }
+        // 保存答题结果到记录
+        function saveQuizResult() {
+            const totalCorrect = state.stageResults.reduce((sum, r) => sum + r.correct, 0);
+            const totalWrong = state.stageResults.reduce((sum, r) => sum + r.wrong, 0);
+            const totalQuestions = state.stageResults.reduce((sum, r) => sum + r.total, 0);
 
-    const rec = { name, phone, time: fmtNow() };
-    state.records.unshift(rec);
-    saveRecords();
+            const result = {
+                studentId: state.studentId,
+                time: fmtNow(),
+                totalCorrect: totalCorrect,
+                totalWrong: totalWrong,
+                totalQuestions: totalQuestions,
+                stageResults: state.stageResults.map(r => ({
+                    stage: r.stage,
+                    correct: r.correct,
+                    wrong: r.wrong,
+                    total: r.total,
+                    passed: r.passed
+                }))
+            };
 
-    state.finished = true;
-    saveState();
+            state.records.unshift(result);
+            saveRecords();
 
-    hint.textContent = "已提交成功！";
-    setTimeout(()=> renderHome(), 700);
-  });
-}
+            // 尝试保存到线上
+            saveToOnline(result);
+        }
 
-function renderRecords(){
-  sub.textContent = "通关名单";
-  const rows = state.records.slice(0, 200).map((r, idx)=>`
+        // 保存到线上
+        async function saveToOnline(result) {
+            if (!ONLINE_SAVE_CONFIG.enabled) {
+                return; // 未启用线上保存
+            }
+
+            try {
+                if (ONLINE_SAVE_CONFIG.type === 'gist' && ONLINE_SAVE_CONFIG.gistToken && ONLINE_SAVE_CONFIG.gistId) {
+                    // 使用 GitHub Gist API
+                    const allResults = state.records;
+                    const content = JSON.stringify(allResults, null, 2);
+
+                    // GitHub API 认证：classic token 使用 token 前缀，fine-grained token 使用 Bearer
+                    // 为了兼容性，先尝试 token 前缀（适用于 classic token）
+                    const token = ONLINE_SAVE_CONFIG.gistToken;
+
+                    const response = await fetch(`https://api.github.com/gists/${ONLINE_SAVE_CONFIG.gistId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Authorization': `token ${token}`, // classic token 使用 token 前缀
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/vnd.github.v3+json'
+                        },
+                        body: JSON.stringify({
+                            files: {
+                                'quiz_results.json': {
+                                    content: content
+                                }
+                            }
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log('✓ 已保存到 GitHub Gist:', data.html_url);
+                        // 可选：显示成功提示
+                        const hint = document.getElementById('formHint');
+                        if (hint) {
+                            hint.textContent = '答题结果已自动保存到线上';
+                            hint.style.color = 'var(--brand)';
+                        }
+                    } else {
+                        const errorText = await response.text();
+                        console.error('保存到 Gist 失败:', response.status, errorText);
+                        // 静默失败，不影响用户体验
+                    }
+                } else if (ONLINE_SAVE_CONFIG.type === 'webhook' && ONLINE_SAVE_CONFIG.webhookUrl) {
+                    // 使用 Webhook（如 Google Apps Script）
+                    const response = await fetch(ONLINE_SAVE_CONFIG.webhookUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            studentId: result.studentId,
+                            totalCorrect: result.totalCorrect,
+                            totalWrong: result.totalWrong,
+                            totalQuestions: result.totalQuestions,
+                            stageResults: result.stageResults,
+                            time: result.time
+                        })
+                    });
+                    if (response.ok) {
+                        console.log('✓ 已保存到线上');
+                    } else {
+                        console.error('保存到 Webhook 失败:', await response.text());
+                    }
+                }
+            } catch (e) {
+                console.error('保存到线上失败:', e);
+                // 静默失败，不影响用户体验
+            }
+        }
+
+        function renderRecords() {
+            sub.textContent = "答题统计（开发者模式）";
+            const rows = state.records.slice(0, 200).map((r, idx) => {
+                if (r.studentId) {
+                    // 新格式：包含学号和答题结果
+                    const stageInfo = r.stageResults ? r.stageResults.map(sr =>
+                        `${sr.stage}: ${sr.correct}/${sr.total}`
+                    ).join('; ') : '无';
+                    return `
     <tr>
-      <td style="padding:8px;border-bottom:1px solid rgba(0,0,0,.08)">${idx+1}</td>
-      <td style="padding:8px;border-bottom:1px solid rgba(0,0,0,.08)">${r.name}</td>
-      <td style="padding:8px;border-bottom:1px solid rgba(0,0,0,.08)">${r.phone}</td>
+      <td style="padding:8px;border-bottom:1px solid rgba(0,0,0,.08)">${idx + 1}</td>
+      <td style="padding:8px;border-bottom:1px solid rgba(0,0,0,.08)">${r.studentId}</td>
+      <td style="padding:8px;border-bottom:1px solid rgba(0,0,0,.08)">${r.totalCorrect}/${r.totalQuestions}</td>
+      <td style="padding:8px;border-bottom:1px solid rgba(0,0,0,.08)">${stageInfo}</td>
       <td style="padding:8px;border-bottom:1px solid rgba(0,0,0,.08)">${r.time}</td>
     </tr>
-  `).join("");
+  `;
+                } else {
+                    // 旧格式：兼容旧数据
+                    return `
+    <tr>
+      <td style="padding:8px;border-bottom:1px solid rgba(0,0,0,.08)">${idx + 1}</td>
+      <td style="padding:8px;border-bottom:1px solid rgba(0,0,0,.08)">${r.name || '未知'}</td>
+      <td style="padding:8px;border-bottom:1px solid rgba(0,0,0,.08)">${r.phone || '未知'}</td>
+      <td style="padding:8px;border-bottom:1px solid rgba(0,0,0,.08)">-</td>
+      <td style="padding:8px;border-bottom:1px solid rgba(0,0,0,.08)">${r.time}</td>
+    </tr>
+  `;
+                }
+            }).join("");
 
-  view.innerHTML = `
+            view.innerHTML = `
     <div class="card">
-      <div class="big">完全通关名单（本浏览器）</div>
+      <div class="big">答题统计记录（开发者模式）</div>
       <div class="smallnote">条数：${state.records.length}（最多预览 200 条）</div>
 
       <div style="overflow:auto;margin-top:10px;border:1px solid rgba(0,0,0,.10);border-radius:12px">
@@ -753,17 +1063,18 @@ function renderRecords(){
           <thead>
             <tr style="background:rgba(0,0,0,.04)">
               <th style="padding:8px;text-align:left">序号</th>
-              <th style="padding:8px;text-align:left">姓名</th>
-              <th style="padding:8px;text-align:left">手机号</th>
-              <th style="padding:8px;text-align:left">时间</th>
+              <th style="padding:8px;text-align:left">学号</th>
+              <th style="padding:8px;text-align:left">总成绩</th>
+              <th style="padding:8px;text-align:left">各关成绩</th>
+              <th style="padding:8px;text-align:left">完成时间</th>
             </tr>
           </thead>
-          <tbody>${rows || `<tr><td colspan="4" style="padding:10px">暂无记录</td></tr>`}</tbody>
+          <tbody>${rows || `<tr><td colspan="5" style="padding:10px">暂无记录</td></tr>`}</tbody>
         </table>
       </div>
 
       <div class="footer">
-        <div class="hint">抽奖用：导出 CSV 后直接在表格里随机抽取</div>
+        <div class="hint">开发者专用：导出 CSV 用于统计分析</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
           <button class="btn secondary" id="exportBtn2">导出 CSV</button>
           <button class="btn" id="homeBtn3">返回首页</button>
@@ -772,31 +1083,85 @@ function renderRecords(){
     </div>
   `;
 
-  document.getElementById("exportBtn2").addEventListener("click", exportCSV);
-  document.getElementById("homeBtn3").addEventListener("click", renderHome);
-}
+            document.getElementById("exportBtn2").addEventListener("click", exportCSV);
+            document.getElementById("homeBtn3").addEventListener("click", renderHome);
+        }
 
-function exportCSV(){
-  const header = ["姓名","手机号","通关时间"];
-  const lines = [header.join(",")].concat(
-    state.records.map(r => [r.name, r.phone, r.time].map(escapeCSV).join(","))
-  );
-  const blob = new Blob(["\ufeff"+lines.join("\n")], {type:"text/csv;charset=utf-8"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "通关名单.csv";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-}
+        function exportCSV() {
+            const header = ["学号", "总正确", "总错误", "总题数", "第一关成绩", "第二关成绩", "第三关成绩", "完成时间"];
+            const lines = [header.join(",")].concat(
+                state.records.map(r => {
+                    if (r.studentId) {
+                        // 新格式
+                        const stage1 = r.stageResults && r.stageResults[0] ? `${r.stageResults[0].correct}/${r.stageResults[0].total}` : '-';
+                        const stage2 = r.stageResults && r.stageResults[1] ? `${r.stageResults[1].correct}/${r.stageResults[1].total}` : '-';
+                        const stage3 = r.stageResults && r.stageResults[2] ? `${r.stageResults[2].correct}/${r.stageResults[2].total}` : '-';
+                        return [
+                            r.studentId,
+                            r.totalCorrect || 0,
+                            r.totalWrong || 0,
+                            r.totalQuestions || 0,
+                            stage1,
+                            stage2,
+                            stage3,
+                            r.time
+                        ].map(escapeCSV).join(",");
+                    } else {
+                        // 旧格式兼容
+                        return [
+                            r.name || '',
+                            '',
+                            '',
+                            '',
+                            '',
+                            '',
+                            '',
+                            r.time
+                        ].map(escapeCSV).join(",");
+                    }
+                })
+            );
+            const blob = new Blob(["\ufeff" + lines.join("\n")], { type: "text/csv;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "答题统计_" + new Date().toISOString().slice(0, 10) + ".csv";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        }
 
-/* -------------------------
-   启动
-------------------------- */
-updateMusicBtn();
-renderHome();
-</script>
+        /* -------------------------
+           开发者模式：通过特殊按键组合进入
+        ------------------------- */
+        let devKeySequence = [];
+        document.addEventListener('keydown', (e) => {
+            devKeySequence.push(e.key);
+            if (devKeySequence.length > 5) devKeySequence.shift();
+            // 按顺序按下：d-e-v
+            if (devKeySequence.slice(-3).join('') === 'dev') {
+                // 显示开发者入口
+                const topbar = document.querySelector('.topbar .controls');
+                if (topbar && !document.getElementById('devRecordsBtn')) {
+                    const devBtn = document.createElement('button');
+                    devBtn.className = 'btn ghost';
+                    devBtn.id = 'devRecordsBtn';
+                    devBtn.textContent = '📊 统计';
+                    devBtn.style.fontSize = '12px';
+                    devBtn.addEventListener('click', renderRecords);
+                    topbar.insertBefore(devBtn, topbar.firstChild);
+                    devKeySequence = [];
+                }
+            }
+        });
+
+        /* -------------------------
+           启动
+        ------------------------- */
+        updateMusicBtn();
+        renderHome();
+    </script>
 </body>
+
 </html>
