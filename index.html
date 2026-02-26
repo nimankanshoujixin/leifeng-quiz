@@ -340,20 +340,32 @@
         };
 
         // 线上保存配置（可选）
-        // 方式1：使用 GitHub Gist API（需要创建 GitHub Personal Access Token）
+        // 方式1：使用 Bmob（推荐，国内可用，完全免费）
+        // 方式2：使用 LeanCloud（已停止注册新账号）
+        // 方式3：使用 GitHub Gist API（需要创建 GitHub Personal Access Token，Token 会泄露）
         // 
-        // 配置步骤：
-        // 1. 访问 https://github.com/settings/tokens 创建 Personal Access Token（需要 gist 权限）
-        // 2. 访问 https://gist.github.com 创建一个新的 Gist，文件名设为 quiz_results.json，内容为 []
-        // 3. 从 Gist URL 中获取 Gist ID（32位字符）
-        // 4. 将 token 和 gistId 填入下方配置
+        // Bmob 配置步骤（推荐）：
+        // 1. 访问 https://www.bmob.cn 注册账号
+        // 2. 创建应用（选择"免费版"）
+        // 3. 在"设置" → "应用密钥"中获取 Application ID 和 REST API Key
+        // 4. 在"数据服务" → "数据浏览"中创建表：QuizResults
+        // 5. 将 Application ID 和 REST API Key 填入下方配置
         // 
-        // ⚠️ 注意：如果代码是公开的，token 会被暴露。建议使用 Secret Gist。
+        // ⚠️ 注意：如果使用 GitHub Gist，代码是公开的，token 会被暴露。
         const ONLINE_SAVE_CONFIG = {
-            enabled: true, // 设置为 true 启用线上保存
-            type: 'gist', // 'gist' 或 'webhook'
-            gistToken: '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', // GitHub Personal Access Token（格式：ghp_xxxxxxxxxxxx）
-            gistId: '41cba8f8ff95d10be8249902c27e1a83', // GitHub Gist ID（32位字符，从 Gist URL 中获取）
+            enabled: false, // 设置为 true 启用线上保存
+            type: 'bmob', // 'bmob'、'leancloud'、'gist' 或 'webhook'
+            // Bmob 配置（推荐，国内可用，免费）
+            bmobApplicationId: '49324a15ae64d3b2ee4f8adb08716cc2', // Bmob Application ID
+            bmobRestApiKey: 'c034c03d69c99c5185f19997ca1f32a5', // Bmob REST API Key
+            // LeanCloud 配置（已停止注册）
+            leancloudAppId: '', // LeanCloud App ID
+            leancloudAppKey: '', // LeanCloud App Key
+            leancloudServerUrl: '', // 服务器地址（可选，会自动从 App ID 生成）
+            // GitHub Gist 配置（不推荐，Token 会泄露）
+            gistToken: '', // GitHub Personal Access Token（格式：ghp_xxxxxxxxxxxx）
+            gistId: '', // GitHub Gist ID（32位字符，从 Gist URL 中获取）
+            // Webhook 配置
             webhookUrl: '' // Webhook URL（如 Google Apps Script Web App URL）
         };
 
@@ -979,7 +991,99 @@
             console.log('🔄 开始保存到线上...', result);
 
             try {
-                if (ONLINE_SAVE_CONFIG.type === 'gist' && ONLINE_SAVE_CONFIG.gistToken && ONLINE_SAVE_CONFIG.gistId) {
+                if (ONLINE_SAVE_CONFIG.type === 'bmob' && ONLINE_SAVE_CONFIG.bmobApplicationId && ONLINE_SAVE_CONFIG.bmobRestApiKey) {
+                    // 使用 Bmob API（推荐，国内可用，免费）
+                    console.log('📤 通过 Bmob 保存数据...');
+
+                    const apiUrl = `https://api2.bmob.cn/1/classes/QuizResults`;
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'X-Bmob-Application-Id': ONLINE_SAVE_CONFIG.bmobApplicationId,
+                            'X-Bmob-REST-API-Key': ONLINE_SAVE_CONFIG.bmobRestApiKey,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            studentId: result.studentId,
+                            totalCorrect: result.totalCorrect,
+                            totalWrong: result.totalWrong,
+                            totalQuestions: result.totalQuestions,
+                            stageResults: result.stageResults,
+                            time: result.time
+                        })
+                    });
+
+                    if (response.ok) {
+                        const responseData = await response.json();
+                        console.log('✅ 已保存到 Bmob:', responseData.objectId);
+                        // 显示成功提示
+                        const hint = document.getElementById('formHint');
+                        if (hint) {
+                            hint.textContent = '✅ 答题结果已自动保存到线上';
+                            hint.style.color = '#2ecc71';
+                        }
+                    } else {
+                        const errorText = await response.text();
+                        console.error('❌ 保存到 Bmob 失败:', response.status, errorText);
+                        // 显示错误提示
+                        const hint = document.getElementById('formHint');
+                        if (hint) {
+                            hint.textContent = '⚠️ 保存到线上失败，但已保存到本地';
+                            hint.style.color = '#e74c3c';
+                        }
+                    }
+                } else if (ONLINE_SAVE_CONFIG.type === 'leancloud' && ONLINE_SAVE_CONFIG.leancloudAppId && ONLINE_SAVE_CONFIG.leancloudAppKey) {
+                    // 使用 LeanCloud API（已停止注册新账号）
+                    console.log('📤 通过 LeanCloud 保存数据...');
+
+                    // 生成服务器地址（如果未提供）
+                    let serverUrl = ONLINE_SAVE_CONFIG.leancloudServerUrl;
+                    if (!serverUrl && ONLINE_SAVE_CONFIG.leancloudAppId) {
+                        // 从 App ID 生成服务器地址
+                        const appIdPrefix = ONLINE_SAVE_CONFIG.leancloudAppId.substring(0, 8);
+                        serverUrl = `https://${appIdPrefix}.api.lncld.net`;
+                    }
+
+                    const apiUrl = `${serverUrl}/1.1/classes/QuizResults`;
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'X-LC-Id': ONLINE_SAVE_CONFIG.leancloudAppId,
+                            'X-LC-Key': ONLINE_SAVE_CONFIG.leancloudAppKey,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            studentId: result.studentId,
+                            totalCorrect: result.totalCorrect,
+                            totalWrong: result.totalWrong,
+                            totalQuestions: result.totalQuestions,
+                            stageResults: result.stageResults,
+                            time: result.time
+                        })
+                    });
+
+                    if (response.ok) {
+                        const responseData = await response.json();
+                        console.log('✅ 已保存到 LeanCloud:', responseData.objectId);
+                        // 显示成功提示
+                        const hint = document.getElementById('formHint');
+                        if (hint) {
+                            hint.textContent = '✅ 答题结果已自动保存到线上';
+                            hint.style.color = '#2ecc71';
+                        }
+                    } else {
+                        const errorText = await response.text();
+                        console.error('❌ 保存到 LeanCloud 失败:', response.status, errorText);
+                        // 显示错误提示
+                        const hint = document.getElementById('formHint');
+                        if (hint) {
+                            hint.textContent = '⚠️ 保存到线上失败，但已保存到本地';
+                            hint.style.color = '#e74c3c';
+                        }
+                    }
+                } else if (ONLINE_SAVE_CONFIG.type === 'gist' && ONLINE_SAVE_CONFIG.gistToken && ONLINE_SAVE_CONFIG.gistId) {
                     // 使用 GitHub Gist API
                     const allResults = state.records;
                     const content = JSON.stringify(allResults, null, 2);
@@ -1091,7 +1195,8 @@
                         }
                     }
                 } else if (ONLINE_SAVE_CONFIG.type === 'webhook' && ONLINE_SAVE_CONFIG.webhookUrl) {
-                    // 使用 Webhook（如 Google Apps Script）
+                    // 使用 Webhook（如 Google Apps Script）- 推荐方案，Token 不会泄露
+                    console.log('📤 通过 Webhook 保存数据...');
                     const response = await fetch(ONLINE_SAVE_CONFIG.webhookUrl, {
                         method: 'POST',
                         headers: {
@@ -1106,10 +1211,25 @@
                             time: result.time
                         })
                     });
+
                     if (response.ok) {
-                        console.log('✓ 已保存到线上');
+                        const responseData = await response.json().catch(() => ({ message: '成功' }));
+                        console.log('✅ 已保存到线上:', responseData.message || '成功');
+                        // 显示成功提示
+                        const hint = document.getElementById('formHint');
+                        if (hint) {
+                            hint.textContent = '✅ 答题结果已自动保存到线上';
+                            hint.style.color = '#2ecc71';
+                        }
                     } else {
-                        console.error('保存到 Webhook 失败:', await response.text());
+                        const errorText = await response.text();
+                        console.error('❌ 保存到 Webhook 失败:', response.status, errorText);
+                        // 显示错误提示
+                        const hint = document.getElementById('formHint');
+                        if (hint) {
+                            hint.textContent = '⚠️ 保存到线上失败，但已保存到本地';
+                            hint.style.color = '#e74c3c';
+                        }
                     }
                 }
             } catch (e) {
