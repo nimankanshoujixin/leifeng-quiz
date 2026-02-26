@@ -994,42 +994,74 @@
                 if (ONLINE_SAVE_CONFIG.type === 'bmob' && ONLINE_SAVE_CONFIG.bmobApplicationId && ONLINE_SAVE_CONFIG.bmobRestApiKey) {
                     // 使用 Bmob API（推荐，国内可用，免费）
                     console.log('📤 通过 Bmob 保存数据...');
+                    console.log('App ID:', ONLINE_SAVE_CONFIG.bmobApplicationId.substring(0, 10) + '...');
 
-                    const apiUrl = `https://api2.bmob.cn/1/classes/QuizResults`;
+                    // Bmob API 地址（使用正确的域名）
+                    const apiUrls = [
+                        `https://api.bmobcloud.com/1/classes/QuizResults`, // 正确的 API 地址
+                        `https://api2.bmob.cn/1/classes/QuizResults`, // 备用地址
+                        `https://api.bmob.cn/1/classes/QuizResults` // 备用地址
+                    ];
 
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: {
-                            'X-Bmob-Application-Id': ONLINE_SAVE_CONFIG.bmobApplicationId,
-                            'X-Bmob-REST-API-Key': ONLINE_SAVE_CONFIG.bmobRestApiKey,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            studentId: result.studentId,
-                            totalCorrect: result.totalCorrect,
-                            totalWrong: result.totalWrong,
-                            totalQuestions: result.totalQuestions,
-                            stageResults: result.stageResults,
-                            time: result.time
-                        })
-                    });
+                    let lastError = null;
+                    let success = false;
 
-                    if (response.ok) {
-                        const responseData = await response.json();
-                        console.log('✅ 已保存到 Bmob:', responseData.objectId);
-                        // 显示成功提示
-                        const hint = document.getElementById('formHint');
-                        if (hint) {
-                            hint.textContent = '✅ 答题结果已自动保存到线上';
-                            hint.style.color = '#2ecc71';
+                    for (const apiUrl of apiUrls) {
+                        try {
+                            console.log('尝试 API 地址:', apiUrl);
+
+                            const response = await fetch(apiUrl, {
+                                method: 'POST',
+                                headers: {
+                                    'X-Bmob-Application-Id': ONLINE_SAVE_CONFIG.bmobApplicationId,
+                                    'X-Bmob-REST-API-Key': ONLINE_SAVE_CONFIG.bmobRestApiKey,
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    studentId: result.studentId,
+                                    totalCorrect: result.totalCorrect,
+                                    totalWrong: result.totalWrong,
+                                    totalQuestions: result.totalQuestions,
+                                    stageResults: result.stageResults,
+                                    time: result.time
+                                })
+                            });
+
+                            if (response.ok) {
+                                const responseData = await response.json();
+                                console.log('✅ 已保存到 Bmob:', responseData.objectId);
+                                // 显示成功提示
+                                const hint = document.getElementById('formHint');
+                                if (hint) {
+                                    hint.textContent = '✅ 答题结果已自动保存到线上';
+                                    hint.style.color = '#2ecc71';
+                                }
+                                success = true;
+                                break;
+                            } else {
+                                const errorText = await response.text();
+                                console.warn('⚠️ API 地址失败:', apiUrl, response.status, errorText);
+                                lastError = { status: response.status, text: errorText, url: apiUrl };
+                            }
+                        } catch (error) {
+                            console.warn('⚠️ 请求失败:', apiUrl, error.message);
+                            lastError = { error: error.message, url: apiUrl };
                         }
-                    } else {
-                        const errorText = await response.text();
-                        console.error('❌ 保存到 Bmob 失败:', response.status, errorText);
+                    }
+
+                    if (!success) {
+                        console.error('❌ 所有 Bmob API 地址都失败');
+                        console.error('最后错误:', lastError);
+                        console.error('💡 排查建议：');
+                        console.error('1. 检查 Bmob 应用是否激活');
+                        console.error('2. 检查 Application ID 和 REST API Key 是否正确');
+                        console.error('3. 检查网络连接');
+                        console.error('4. 访问 Bmob 控制台确认应用状态');
+
                         // 显示错误提示
                         const hint = document.getElementById('formHint');
                         if (hint) {
-                            hint.textContent = '⚠️ 保存到线上失败，但已保存到本地';
+                            hint.textContent = '⚠️ 保存到线上失败，但已保存到本地（请检查 Bmob 配置）';
                             hint.style.color = '#e74c3c';
                         }
                     }
