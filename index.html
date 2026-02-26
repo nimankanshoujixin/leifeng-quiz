@@ -478,6 +478,9 @@
         const sub = document.getElementById("sub");
 
         let state = loadState() || {
+            // 基本信息（班级 / 姓名 / 学号）——班级和姓名仅用于前端展示，不参与保存
+            className: "",
+            studentName: "",
             studentId: "",
             stageIndex: 0,
             qIndex: 0,
@@ -513,6 +516,8 @@
             // records 也一起清掉，如你想保留记录就注释下一行
             // localStorage.removeItem(STORE_KEY+"_records");
             state = {
+                className: "",
+                studentName: "",
                 studentId: "",
                 stageIndex: 0, qIndex: 0, correct: 0, wrong: 0,
                 medals: { stage1: false, stage2: false, stage3: false },
@@ -586,16 +591,23 @@
             sub.textContent = "三关闯关，集齐勋章，完成通关抽奖";
             const medals = state.medals;
 
-            // 如果已有学号，显示学号信息；否则显示输入表单
-            const studentIdSection = state.studentId
+            // 是否已经填写完整的个人信息
+            const hasProfile = !!(state.className && state.studentName && state.studentId);
+
+            // 如果已有完整信息，显示概览；否则显示输入表单
+            const profileSection = hasProfile
                 ? `<div class="smallnote" style="margin-top:10px;padding:10px;background:rgba(0,0,0,.04);border-radius:8px">
-                    <b>学号：</b>${state.studentId}
-                    <button class="btn ghost" id="changeStudentIdBtn" style="margin-left:10px;padding:6px 10px;font-size:12px">修改</button>
+                    <b>信息：</b>${state.className} - ${state.studentName} - ${state.studentId}
+                    <button class="btn ghost" id="changeProfileBtn" style="margin-left:10px;padding:6px 10px;font-size:12px">修改</button>
                    </div>`
                 : `<div class="field" style="margin-top:10px">
+                    <label><b>班级</b>（必填）</label>
+                    <input id="classInput" placeholder="请输入班级，如 初一（1）班" />
+                    <label><b>姓名</b>（必填）</label>
+                    <input id="nameInput" placeholder="请输入姓名" />
                     <label><b>学号</b>（必填）</label>
                     <input id="studentIdInput" placeholder="请输入学号" />
-                    <div class="smallnote">请填写您的学号，用于统计答题结果</div>
+                    <div class="smallnote">请填写班级、姓名和学号，用于统计答题结果</div>
                   </div>`;
 
             view.innerHTML = `
@@ -610,7 +622,7 @@
         <div class="smallnote">规则：每关答题达到通关线才能进入下一关，否则本次挑战失败。</div>
         <div class="smallnote">提示：首次点击"开始"后，音乐才允许播放（浏览器限制）。</div>
         
-        ${studentIdSection}
+        ${profileSection}
         
         <div class="footer" style="margin-top:12px">
           <div class="hint">
@@ -631,21 +643,30 @@
 
             const startBtn = document.getElementById("startBtn");
             startBtn.addEventListener("click", async () => {
-                // 检查学号
-                if (!state.studentId) {
-                    const input = document.getElementById("studentIdInput");
-                    if (input) {
-                        const id = input.value.trim();
-                        if (!id) {
-                            alert("请先填写学号！");
-                            return;
-                        }
-                        state.studentId = id;
-                        saveState();
-                    } else {
-                        alert("请先填写学号！");
+                // 检查班级 / 姓名 / 学号
+                if (!hasProfile) {
+                    const classInput = document.getElementById("classInput");
+                    const nameInput = document.getElementById("nameInput");
+                    const idInput = document.getElementById("studentIdInput");
+
+                    if (!classInput || !nameInput || !idInput) {
+                        alert("请先填写班级、姓名和学号！");
                         return;
                     }
+
+                    const cls = classInput.value.trim();
+                    const name = nameInput.value.trim();
+                    const id = idInput.value.trim();
+
+                    if (!cls || !name || !id) {
+                        alert("请完整填写班级、姓名和学号！");
+                        return;
+                    }
+
+                    state.className = cls;
+                    state.studentName = name;
+                    state.studentId = id;
+                    saveState();
                 }
 
                 // 用户交互后尝试播放音乐
@@ -653,9 +674,11 @@
                 startNewRun();
             });
 
-            const changeBtn = document.getElementById("changeStudentIdBtn");
+            const changeBtn = document.getElementById("changeProfileBtn");
             if (changeBtn) {
                 changeBtn.addEventListener("click", () => {
+                    state.className = "";
+                    state.studentName = "";
                     state.studentId = "";
                     saveState();
                     renderHome();
@@ -931,6 +954,28 @@
                 max-height: 90%;
                 animation: scaleIn 0.5s ease;
             `;
+
+            // 顶部显示 班级-姓名-学号 信息
+            const infoTextParts = [];
+            if (state.className) infoTextParts.push(state.className);
+            if (state.studentName) infoTextParts.push(state.studentName);
+            if (state.studentId) infoTextParts.push(state.studentId);
+            const infoText = infoTextParts.join(" - ");
+
+            if (infoText) {
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'smallnote';
+                infoDiv.style.cssText = `
+                    color: #fff;
+                    text-align: center;
+                    margin-bottom: 12px;
+                    font-size: 16px;
+                    font-weight: 700;
+                    text-shadow: 0 2px 4px rgba(0,0,0,.6);
+                `;
+                infoDiv.textContent = infoText;
+                imageContainer.appendChild(infoDiv);
+            }
 
             // 创建图片
             const img = document.createElement('img');
