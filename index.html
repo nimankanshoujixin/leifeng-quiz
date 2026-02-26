@@ -334,9 +334,9 @@
            配置区：你可以自由改这些
         ------------------------- */
         const PASS = {
-            stage1_min_correct: 8, // 第一关 8 题
-            stage2_min_correct: 8, // 第二关 8 题
-            stage3_min_correct: 8  // 第三关 8 题
+            stage1_min_correct: 1, // 第一关 8 题
+            stage2_min_correct: 1, // 第二关 8 题
+            stage3_min_correct: 1  // 第三关 8 题
         };
 
         // 线上保存配置（可选）
@@ -353,7 +353,7 @@
         // 
         // ⚠️ 注意：如果使用 GitHub Gist，代码是公开的，token 会被暴露。
         const ONLINE_SAVE_CONFIG = {
-            enabled: false, // 设置为 true 启用线上保存
+            enabled: true, // 设置为 true 启用线上保存
             type: 'bmob', // 'bmob'、'leancloud'、'gist' 或 'webhook'
             // Bmob 配置（推荐，国内可用，免费）
             bmobApplicationId: '49324a15ae64d3b2ee4f8adb08716cc2', // Bmob Application ID
@@ -378,7 +378,7 @@
 
         /* -------------------------
            题库：来自你的 PDF（共 59 题，缺少第56题）
-           下面按 20 / 20 / 19 分配
+           下面按 8 / 8 / 8 分配
         ------------------------- */
 
         const Q_STAGE1 = [
@@ -593,7 +593,7 @@
         
         <div class="footer" style="margin-top:12px">
           <div class="hint">
-            通关线：第一关 ≥ ${PASS.stage1_min_correct}/20，第二关 ≥ ${PASS.stage2_min_correct}/20，第三关 ≥ ${PASS.stage3_min_correct}/19
+            通关线：第一关 ≥ ${PASS.stage1_min_correct}/8，第二关 ≥ ${PASS.stage2_min_correct}/8，第三关 ≥ ${PASS.stage3_min_correct}/8
           </div>
           <div style="display:flex;gap:10px;flex-wrap:wrap">
             <button class="btn" id="startBtn">开始</button>
