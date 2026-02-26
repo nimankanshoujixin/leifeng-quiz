@@ -845,10 +845,10 @@
       <div class="big" style="color:${passed ? "var(--gold)" : "var(--brand)"}; margin-top:10px">${msg}</div>
 
       <div class="footer" style="margin-top:12px">
-        <div class="hint">${passed ? "继续挑战下一关" : "你可以返回首页重新开始"}</div>
+        <div class="hint">${passed ? (sIdx === 2 ? "恭喜完成所有关卡！" : "继续挑战下一关") : "你可以返回首页重新开始"}</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
-          ${passed ? `<button class="btn" id="nextStageBtn">进入下一关</button>` : ""}
-          ${passed && sIdx === 2 ? `<button class="btn" id="finishBtn">填写通关信息</button>` : ""}
+          ${passed && sIdx === 2 ? `<button class="btn" id="claimRewardBtn">领取奖励</button>` : ""}
+          ${passed && sIdx < 2 ? `<button class="btn" id="nextStageBtn">进入下一关</button>` : ""}
           <button class="btn secondary" id="homeBtn">返回首页</button>
           ${!passed ? `<button class="btn" id="retryBtn">重新挑战</button>` : ""}
         </div>
@@ -883,9 +883,102 @@
                 });
             }
 
-            const finishBtn = document.getElementById("finishBtn");
-            if (finishBtn) {
-                finishBtn.addEventListener("click", renderFinishForm);
+            const claimRewardBtn = document.getElementById("claimRewardBtn");
+            if (claimRewardBtn) {
+                claimRewardBtn.addEventListener("click", () => {
+                    // 自动保存答题结果
+                    saveQuizResult();
+                    // 显示奖励图片
+                    showGiftImage();
+                });
+            }
+        }
+
+        // 显示奖励图片
+        function showGiftImage() {
+            // 创建遮罩层
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                animation: fadeIn 0.3s ease;
+            `;
+
+            // 创建图片容器
+            const imageContainer = document.createElement('div');
+            imageContainer.style.cssText = `
+                position: relative;
+                max-width: 90%;
+                max-height: 90%;
+                animation: scaleIn 0.5s ease;
+            `;
+
+            // 创建图片
+            const img = document.createElement('img');
+            img.src = 'gift.png';
+            img.alt = '奖励';
+            img.style.cssText = `
+                width: 100%;
+                height: auto;
+                max-width: 600px;
+                border-radius: 12px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            `;
+
+            // 创建关闭按钮
+            const closeBtn = document.createElement('button');
+            closeBtn.textContent = '关闭';
+            closeBtn.className = 'btn';
+            closeBtn.style.cssText = `
+                margin-top: 20px;
+                width: 100%;
+                padding: 12px 24px;
+                font-size: 16px;
+            `;
+            closeBtn.addEventListener('click', () => {
+                overlay.remove();
+                renderHome();
+            });
+
+            // 组装元素
+            imageContainer.appendChild(img);
+            imageContainer.appendChild(closeBtn);
+            overlay.appendChild(imageContainer);
+
+            // 点击遮罩层也可以关闭
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.remove();
+                    renderHome();
+                }
+            });
+
+            // 添加到页面
+            document.body.appendChild(overlay);
+
+            // 添加动画样式（如果还没有）
+            if (!document.getElementById('gift-animations')) {
+                const style = document.createElement('style');
+                style.id = 'gift-animations';
+                style.textContent = `
+                    @keyframes fadeIn {
+                        from { opacity: 0; }
+                        to { opacity: 1; }
+                    }
+                    @keyframes scaleIn {
+                        from { transform: scale(0.8); opacity: 0; }
+                        to { transform: scale(1); opacity: 1; }
+                    }
+                `;
+                document.head.appendChild(style);
             }
         }
 
